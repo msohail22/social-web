@@ -17,7 +17,35 @@
 	"upload_source_maps": true,
 	"compatibility_flags": [
 		"nodejs_compat"
-	]
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "social_web",
+			"database_id": "1c4376cb-6e1e-44e7-bd91-85a745592877",
+			"migrations_dir": "migrations"
+		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "KV",
+			"id": "48b7e950166543659509b4af8baf7c9a"
+		}
+	],
+	"r2_buckets": [
+		{
+			"binding": "MEDIA_BUCKET",
+			"bucket_name": "social-web-media"
+		}
+	],
+	"queues": {
+		"producers": [
+			{
+				"queue": "social-web-queue",
+				"binding": "QUEUE"
+			}
+		]
+	},
 	/**
 	 * Smart Placement
 	 * https://developers.cloudflare.com/workers/configuration/smart-placement/#smart-placement

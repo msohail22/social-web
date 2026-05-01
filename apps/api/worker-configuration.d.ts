@@ -7,6 +7,12 @@ declare namespace Cloudflare {
 	}
 	interface Env {
 		ASSETS: Fetcher;
+        DB: D1Database;
+        FRONTEND_ORIGIN: string;
+        SESSION_TTL_DAYS: string;
+        KV: KVNamespace;
+        MEDIA_BUCKET: R2Bucket;
+        QUEUE: Queue;
 	}
 }
 interface CloudflareBindings extends Cloudflare.Env {}
