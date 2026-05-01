@@ -32,11 +32,11 @@ jobs:
       - name: Set API secrets
         run: |
           cd apps/api
-          printf "%s" "$API_FRONTEND_ORIGIN" | wrangler secret put FRONTEND_ORIGIN
-          printf "%s" "$API_SESSION_TTL_DAYS" | wrangler secret put SESSION_TTL_DAYS
+          printf "%s" "$API_FRONTEND_ORIGIN" | pnpm exec wrangler secret put FRONTEND_ORIGIN
+          printf "%s" "$API_SESSION_TTL_DAYS" | pnpm exec wrangler secret put SESSION_TTL_DAYS
 
       - name: Apply D1 migrations
-        run: cd apps/api && wrangler d1 migrations apply social_web --remote
+        run: cd apps/api && pnpm exec wrangler d1 migrations apply social_web --remote
 
       - name: Deploy API
         run: pnpm -C apps/api run deploy
