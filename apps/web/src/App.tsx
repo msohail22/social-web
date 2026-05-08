@@ -1,22 +1,9 @@
-
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import HomePage from "./pages/HomePage";
-import LoginPage from "./pages/LoginPage";
-import NotFound from "./pages/NotFound";
-import SignIn from "./pages/SigninPage";
-import BlankPage from "./pages/BlankPage";
-  
-export default function App() {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/signin" element={<SignIn />} />
-        <Route path="*" element={<NotFound />} />
-        <Route path="/" element={<Navigate to="/login" replace />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/home" element={<HomePage />} />
-        <Route path="/blank" element={<BlankPage />} />
-      </Routes>
-    </BrowserRouter>
-  );
+function App() {
+    return (
+      <>
+        <h1>Hello Gay Boy K. Sri Charan </h1>
+      </>
+    )  
 }
+
+export default App

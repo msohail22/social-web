@@ -1,5 +1,5 @@
 {
-  "name": "social-web",
+  "name": "crypt-transit",
   "module": "index.ts",
   "type": "module",
   "private": true,
@@ -8,5 +8,8 @@
   },
   "peerDependencies": {
     "typescript": "^5"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
   }
 }
