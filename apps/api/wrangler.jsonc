@@ -17,6 +17,13 @@
 	"upload_source_maps": true,
 	"compatibility_flags": [
 		"nodejs_compat"
+	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "social-web-api",
+			"database_id": "local-social-web-api"
+		}
 	]
 	/**
 	 * Smart Placement

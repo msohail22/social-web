@@ -1,9 +1,21 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { BrowserRouter } from 'react-router-dom'
+import './index.css'
 import App from './App.tsx'
+
+const queryClient = new QueryClient()
+
+document.documentElement.classList.add('bg-slate-50')
+document.body.className = 'm-0 bg-slate-50'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </BrowserRouter>
   </StrictMode>,
 )

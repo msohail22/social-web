@@ -1,0 +1,37 @@
+model
+  schema 1.1
+
+type user
+  relations
+    define follower: [user]
+    define blocked: [user]
+
+type profile
+  relations
+    define owner: [user]
+    define viewer: [user, user:*] or owner
+    define editor: owner
+
+type post
+  relations
+    define owner: [user]
+    define viewer: [user, user:*] or owner
+    define editor: owner
+    define deleter: owner
+    define commenter: viewer
+    define liker: viewer
+    define bookmarker: viewer
+
+type comment
+  relations
+    define author: [user]
+    define parent: [post]
+    define viewer: viewer from parent
+    define editor: author
+    define deleter: author or owner from parent
+
+type conversation
+  relations
+    define participant: [user]
+    define viewer: participant
+    define sender: participant

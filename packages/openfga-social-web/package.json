@@ -1,0 +1,32 @@
+{
+  "name": "openfga-social-web",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "exports": {
+    ".": {
+      "types": "./index.ts",
+      "import": "./index.ts"
+    },
+    "./model": {
+      "types": "./src/model.ts",
+      "import": "./src/model.ts"
+    },
+    "./identifiers": {
+      "types": "./src/identifiers.ts",
+      "import": "./src/identifiers.ts"
+    }
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "create:store": "bun run scripts/create-store.ts",
+    "init:model": "bun run scripts/init-model.ts"
+  },
+  "sideEffects": false,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
