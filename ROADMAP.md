@@ -2,47 +2,277 @@
 
 Goal: build an intermediate social networking app with graph-based relationships, ranked feeds, realtime updates, and Cloudflare-native infrastructure.
 
+## Owner Task Split
+
+Use this split as the working assignment plan. Each ticket has one primary owner so work does not drift, but the owner should create small handoff notes whenever a ticket crosses backend/frontend boundaries.
+
+For mixed tickets, the primary owner is responsible for closing the ticket, but should ask the other developer for scoped support. Examples: Charan should support Gandharv on notification and report APIs; Gandharv should support Charan on auth, feed, media, and moderation UI states.
+
+### Charan
+
+Primary focus: backend APIs, data model, Cloudflare services, async workers, performance, security, and production readiness.
+
+- TICKET-S0-01: Establish repo conventions, environment config, and CI basics.
+- TICKET-S0-02: Build cookie auth, session handling, and user profile API skeleton.
+- TICKET-S0-03: Create core D1 schema for users, follows, and posts.
+- TICKET-S0-04: Implement basic post create and read API.
+- TICKET-S1-01: Implement follow and unfollow APIs.
+- TICKET-S1-02: Add followers, following, and mutual graph queries.
+- TICKET-S1-03: Build friends-of-friends recommendation query.
+- TICKET-S2-01: Generate feed from follow graph.
+- TICKET-S2-02: Add basic feed ranking with likes and recency.
+- TICKET-S2-03: Cache feed results in KV.
+- TICKET-S3-01: Implement likes and comments APIs.
+- TICKET-S3-03: Add realtime interaction updates with Durable Objects.
+- TICKET-S4-01: Implement media upload pipeline with R2.
+- TICKET-S4-02: Add thumbnailing and compression.
+- TICKET-S4-04: Add rate limiting for posts, likes, and comments.
+- TICKET-S5-01: Implement user and post search APIs.
+- TICKET-S5-02: Update search indexes on write.
+- TICKET-S6-01: Add queue worker for feed fan-out.
+- TICKET-S6-02: Add queue worker for notification creation.
+- TICKET-S6-03: Add queue worker for media processing.
+- TICKET-S6-04: Add queue worker for search indexing.
+- TICKET-S6-05: Add queue worker for activity logging.
+- TICKET-S6-06: Add queue worker for email and webhook dispatch.
+- TICKET-S6-07: Add cleanup, retry, and dead-letter handling.
+- TICKET-S7-01: Define feed cache invalidation rules.
+- TICKET-S7-02: Add hot profile caching.
+- TICKET-S7-03: Add denormalized interaction counters.
+- TICKET-S7-04: Optimize queries and indexes.
+- TICKET-S8-02: Add content moderation hooks.
+- TICKET-S8-03: Implement block and mute users.
+- TICKET-S8-04: Add spam detection rules.
+- TICKET-S9-01: Add structured logging.
+- TICKET-S9-02: Add metrics and traces.
+- TICKET-S9-04: Define SLOs and alerting.
+- TICKET-S11-01: Complete security review.
+- TICKET-S11-02: Verify backup and restore.
+- TICKET-S11-03: Tune rate limits.
+- TICKET-S11-04: Finalize docs and runbooks.
+
+Charan handoffs to Gandharv:
+- Auth state DTOs and route contracts for login, logout, register, and current session.
+- Feed, profile, interaction, notification, media, search, and moderation API DTO examples.
+- Error response shapes and loading/empty-state expectations for each API-backed UI.
+- Cloudflare binding names and local development commands that the web app depends on.
+
+### Gandharv
+
+Primary focus: frontend app shell, product flows, UI states, accessibility, dashboards, and user-facing polish.
+
+- TICKET-S0-05: Deliver minimal web shell.
+- TICKET-S1-04: Add profile UI follow controls.
+- TICKET-S2-04: Implement feed pagination and load more UI.
+- TICKET-S3-02: Add like and comment UI.
+- TICKET-S3-04: Build notifications V1 UI and connect it to notification APIs.
+- TICKET-S4-03: Build post attachments UI.
+- TICKET-S5-03: Build search UI with filters.
+- TICKET-S8-01: Build report and flag flow UI, including moderation queue screens.
+- TICKET-S9-03: Build basic analytics dashboard.
+- TICKET-S10-01: Improve UX, empty states, and loading states.
+- TICKET-S10-02: Add notification preferences UI and connect it to the preferences API.
+- TICKET-S10-03: Run accessibility pass.
+- TICKET-S10-04: Add E2E and load tests for core user flows.
+
+Gandharv handoffs to Charan:
+- Frontend needs that require API changes, including missing fields, pagination shape issues, and error response gaps.
+- UI state requirements for optimistic updates, retries, upload progress, realtime reconnects, and empty states.
+- Accessibility and E2E findings that expose backend or routing problems.
+- Dashboard metric definitions that need backend aggregation support.
+
 ## Sprint 0 (Week 1): Foundations
 
 ### TICKET-S0-01: Establish Repo Conventions, Environment Config, And CI Basics
 **Description:** Define repository structure, formatting expectations, environment variable conventions, and baseline CI checks for the API, web app, and shared packages.
+**Owner:** Charan
+**Why This Comes First:** Every later ticket depends on predictable commands, environment variables, and CI checks. Do this before feature work so both developers can run the same project in the same way.
+
+**Implementation Plan:**
+- Confirm the repo layout for `apps/web`, `apps/api`, and shared `packages/*`.
+- Add or update root-level scripts for install, build, typecheck, lint, and test.
+- Add `.env.example` or `.dev.vars.example` with placeholder values only.
+- Document local setup for Bun, D1, KV, R2, Durable Objects, and Queues.
+- Add a simple pull request CI workflow that runs the baseline checks.
+
+**Suggested Files/Areas:**
+- `package.json`
+- `README.md`
+- `.env.example` or `.dev.vars.example`
+- `.github/workflows/*`
+- `apps/web/package.json`
+- `apps/api/package.json`
+
+**Step-By-Step Work:**
+1. List the exact commands a developer should run from a clean checkout.
+2. Add root scripts that call the web and API scripts in a consistent way.
+3. Create the environment example file with comments for every required binding or secret.
+4. Update README with local setup, migration, and Cloudflare binding notes.
+5. Add CI with separate build/typecheck steps so failures are easy to identify.
+6. Run the commands locally and fix missing scripts before moving on.
+
 **Acceptance Criteria:**
 - Root scripts or documented commands exist for install, build, typecheck, lint, and test.
 - `.env.example` or `.dev.vars.example` documents required local variables without secrets.
 - CI runs typecheck/build for API and web on pull requests.
 - README documents local development for web, API, D1, and Cloudflare bindings.
 
+**Done Check:**
+- A new developer can clone the repo, follow README, run one install command, run one dev command, and understand which Cloudflare resources are mocked locally.
+
 ### TICKET-S0-02: Build Cookie Auth And User Profile Skeleton
 **Description:** Complete cookie-based authentication backed by D1 users and expose the minimum profile model needed by the web shell.
+**Owner:** Charan
+**Frontend Handoff:** Gandharv needs the final auth DTOs, redirect behavior, and error messages before wiring the web shell.
+**Why This Comes Before Private Features:** Posts, follows, feeds, media, notifications, and search personalization all require a stable current-user session.
+
+**Implementation Plan:**
+- Create user registration, login, logout, and current-session endpoints under `/api/v1/auth/*`.
+- Store passwords using salted hashes and never return password fields in API responses.
+- Set secure, HTTP-only session cookies with production-safe options.
+- Add middleware/helper logic for protected API routes.
+- Return a compact profile DTO that the frontend can render immediately.
+
+**Suggested Files/Areas:**
+- `apps/api`
+- D1 user/session migrations
+- Auth route handlers
+- Auth middleware
+- Shared API DTO types, if a shared package exists
+- Web auth client helpers, only as needed for handoff validation
+
+**Step-By-Step Work:**
+1. Define `User`, `Session`, and `CurrentUser` DTO shapes before coding routes.
+2. Add D1 tables or migrations needed for users and sessions.
+3. Implement register with validation for email, username, display name, and password.
+4. Implement login with password verification and cookie creation.
+5. Implement logout by clearing the session cookie and invalidating the stored session if sessions are persisted.
+6. Implement `/api/v1/auth/me` so the frontend can restore signed-in state on refresh.
+7. Add route protection helper and use it on one test private route.
+8. Add tests for success, invalid credentials, duplicate users, logout, and unauthenticated access.
+
 **Acceptance Criteria:**
 - Users can register, log in, log out, and fetch the current session through `/api/v1/auth/*`.
 - Passwords are stored as salted hashes, not plaintext.
 - Auth middleware protects private API routes.
 - Frontend redirects unauthenticated users to login and shows signed-in user state.
 
+**Done Check:**
+- A browser session survives refresh, private routes reject anonymous requests, and the API never exposes password hashes or raw session secrets.
+
 ### TICKET-S0-03: Create Core D1 Schema For Users, Follows, And Posts
 **Description:** Add versioned D1 migrations for the primary social graph and post data model.
+**Owner:** Charan
+**Why This Matters:** The schema is the foundation for graph queries, feed generation, ranking, interactions, search indexing, and moderation. Keep it simple, indexed, and easy to migrate.
+
+**Implementation Plan:**
+- Create versioned D1 migrations for `users`, `follows`, and `posts`.
+- Add indexes for username/profile lookup, author post lists, recent post lists, and follow graph lookups.
+- Define foreign key behavior explicitly so deletes do not create orphaned data.
+- Use consistent timestamp fields across tables.
+- Document how to apply migrations locally and against deployed D1 databases.
+
+**Suggested Files/Areas:**
+- `apps/api/migrations` or the repo's chosen migration folder
+- Wrangler/D1 configuration
+- `README.md`
+- Schema/type files used by API routes
+
+**Step-By-Step Work:**
+1. Decide the migration folder and naming convention, such as `0001_create_core_social_tables.sql`.
+2. Define `users` with stable IDs, unique username/email fields, profile fields, and timestamps.
+3. Define `follows` with follower/following IDs, uniqueness constraints, and indexes in both directions.
+4. Define `posts` with author ID, text content, status fields if needed, and timestamps.
+5. Add indexes for the queries already known from Sprint 1 and Sprint 2.
+6. Run migrations locally and verify tables/indexes exist.
+7. Add rollback or forward-fix notes if the migration system does not support automatic rollback.
+
 **Acceptance Criteria:**
 - Migrations define `users`, `follows`, and `posts` tables with indexes for profile lookup, author feeds, and follow queries.
 - Foreign key behavior is explicit.
 - Created/updated timestamps are represented consistently.
 - Migration application is documented for local and deployed D1 databases.
 
+**Done Check:**
+- The schema supports creating a user, following another user, creating a post, listing a user's posts, and querying who follows whom without full table scans.
+
 ### TICKET-S0-04: Implement Basic Post Create And Read API
 **Description:** Add authenticated endpoints for creating posts and reading recent posts.
+**Owner:** Charan
+**Frontend Handoff:** Gandharv needs the post DTO, validation errors, and pagination shape before building the composer and feed shell.
+**Why This Comes After Auth And Schema:** The API needs a signed-in author and a stable posts table before it can create or list content.
+
+**Implementation Plan:**
+- Add a protected endpoint for creating text posts.
+- Add a read endpoint for recent posts with cursor or timestamp pagination.
+- Validate post body length, trim whitespace, and reject empty content.
+- Return stable `/api/v1` DTOs that include author summary data.
+- Add tests around auth, validation, pagination, and response shape.
+
+**Suggested Files/Areas:**
+- `apps/api` post routes
+- Post repository/query helpers
+- Shared DTO types
+- API tests
+- README API examples, if the repo keeps route examples there
+
+**Step-By-Step Work:**
+1. Define the create-post request body and post response DTO.
+2. Implement validation for empty content and max length.
+3. Insert posts with the authenticated user's ID as `author_id`.
+4. Implement recent-post listing ordered by newest first.
+5. Add cursor or timestamp pagination with a clear `nextCursor` response field.
+6. Include compact author fields so the frontend can render a feed item without extra requests.
+7. Add tests for anonymous create, valid create, invalid content, first page, next page, and stable ordering.
+
 **Acceptance Criteria:**
 - Authenticated users can create text posts.
 - API validates post body length and rejects empty content.
 - Recent posts can be listed with cursor or timestamp pagination.
 - Responses use stable DTO shapes under `/api/v1`.
 
+**Done Check:**
+- A logged-in user can create a post, refresh the recent-post endpoint, and see that post returned with author information and pagination metadata.
+
 ### TICKET-S0-05: Deliver Minimal Web Shell
 **Description:** Keep the web app usable with home, profile, and feed placeholder views while backend features are under construction.
+**Owner:** Gandharv
+**Backend Handoff:** Charan must provide auth route contracts and the current-user DTO before the protected shell is considered complete.
+**Why This Completes Sprint 0:** The app needs a visible, navigable surface where future backend features can be connected without rebuilding layout each sprint.
+
+**Implementation Plan:**
+- Build the authenticated app shell with stable layout, navigation, and route protection.
+- Add login/register/logout screens or connect to existing auth screens.
+- Create home, profile, and feed placeholder routes.
+- Add loading, empty, and error states for panels that will later call APIs.
+- Ensure direct deep links work through the SPA fallback.
+
+**Suggested Files/Areas:**
+- `apps/web`
+- Web router setup
+- Auth provider/session store
+- Layout/navigation components
+- Home, profile, and feed route components
+- Web README or local dev notes
+
+**Step-By-Step Work:**
+1. Define the route map for public auth pages and protected app pages.
+2. Add an auth/session provider that calls `/api/v1/auth/me` on app load.
+3. Redirect anonymous users from protected pages to login.
+4. Show signed-in user state and a logout action in the app shell.
+5. Create stable placeholder pages for home, profile, and feed.
+6. Add loading, empty, and error components that can be reused by later API-backed screens.
+7. Verify browser refresh works on every route.
+8. Check mobile and desktop layouts for obvious overflow or navigation issues.
+
 **Acceptance Criteria:**
 - App shell is protected by auth.
 - Home, profile, and feed placeholder pages render without layout shift.
 - Empty/loading/error states are present for API-backed panels.
 - Navigation works on direct deep links through the SPA fallback.
+
+**Done Check:**
+- A user can log in, land inside the protected shell, move between home/profile/feed pages, refresh any route, and log out without seeing broken navigation or blank screens.
 
 ## Sprint 1 (Week 2): Graph And Follow System
 
